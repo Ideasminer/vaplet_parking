@@ -12,9 +12,11 @@ class Layout:
         # clear_way	- way for getting into / out the facility. (int, only need width, defalut 3)
         isl_info = []
         dwell_info = []
+        arrive_info = []
         for isl_ind in range(num_isl):
             isl_info.append(np.zeros([num_stack, 2 * k[isl_ind]]))
             dwell_info.append(np.zeros([num_stack, 2 * k[isl_ind]]))
+            arrive_info.append(np.zeros([num_stack, 2 * k[isl_ind]]))
         tpark_info = []
         tpark_capacity = int(np.floor(num_stack * spot_size[0] / spot_size[1]))
         if len(num_tpark) != num_isl + 1:
@@ -35,8 +37,9 @@ class Layout:
         self.pass_info = pass_info
         self.spot_size = spot_size
        	self.clear_way = clear_way
-	
-    
+        self.arrive_info = arrive_info
+
+
     def get_size(self):
         # get the parking facility's overall size
         tpark_x = self.spot_size[0] * sum([tpark.shape[1] for tpark in self.tpark_info])
@@ -49,12 +52,12 @@ class Layout:
         except:
             print(self.isl_info)
             raise ValueError("list index out of range")
-    
-    
+
+
     def get_capacity(self):
         return sum(island.shape[0] * island.shape[1] for island in self.isl_info)
 
-        
+
 def generate(lam, mu, v_num, threshold = 4):
     # lam 	- arrival rate
     # mu	- mean of dwell time
@@ -72,7 +75,7 @@ def generate(lam, mu, v_num, threshold = 4):
 
 
 
-def arrive(veh, turn, facility, dwell, policy = "A1", show = False):
+def arrive(veh, turn, facility, dwell, event, policy = "A1", show = False, mu=4):
     # 在选择到达策略前，首先判断该到达车辆是否是tpark中重定位的车辆
     for i in range(len(facility.tpark_info)):
         if np.argwhere(facility.tpark_info[i] == veh).size > 0:
@@ -331,7 +334,7 @@ def arrive(veh, turn, facility, dwell, policy = "A1", show = False):
             # 将停车岛按容量从小到大排序
             isl_capacity_argsort = np.argsort(isl_capacity)
             # 如果此时是短时类型
-            if dwell == 1: 
+            if dwell == 1:
                 # 如果是短时停放，目标停车岛是当前候选停车岛中最小的停车岛
                 target_isl_ind = backup_isl[isl_capacity_argsort[0]]
                 target_isl = facility.isl_info[target_isl_ind]
@@ -553,12 +556,137 @@ def arrive(veh, turn, facility, dwell, policy = "A1", show = False):
         else:
             # print(veh, facility.isl_info)
             return "reject"
-        if policy == "B1":
-            pass
-        if policy == "B2":
-            pass
-        if policy == "B3":
-            pass
+    if policy == "B1":
+        # 按照阻挡概率进行停放，单岛优先策略
+        # 首先检索哪些岛可以停放，从中选择一个最小的停车岛
+        # 先从最内侧开始停放，最内侧排有空时，不计算阻挡概率
+        # 如果内侧排已经满了，则停放在外侧排，选择停车栈堆时，计算各个栈堆对应位置的阻挡概率
+        # 计算公式为：1-1/2*e^(-t/mu)，其中，t是两个车到达时间的差值(t2-t1)
+        isl_capacity = []
+        backup_isl = []
+        probn = 0
+        if np.argwhere(facility.isl_info == veh).size > 0:
+            raise ValueError("Already Here!!!!\n\n\n")
+        for i in range(len(facility.isl_info)):
+            island = facility.isl_info[i]
+            if np.argwhere(island == 0).size > 0:
+                # 如果当前停车岛还有空车位，成为备选停车岛
+                backup_isl.append(i)
+                isl_capacity.append(island.shape[0] * island.shape[1])
+            else:
+                continue
+        if backup_isl:
+            # 如果还有备选停车岛，说明停车场没有停满
+            # 选择还有车位的最小停车岛
+            target_isl_ind = backup_isl[np.argmin(isl_capacity)]
+            target_isl = facility.isl_info[target_isl_ind]
+            target_arrive = facility.arrive_info[target_isl_ind]
+            # 检测其中间列是否还有空位
+            for i in range(target_isl.shape[1] // 2):
+                left_row = int(target_isl.shape[1] / 2 - i - 1)
+                right_row = int(target_isl.shape[1] / 2 + i)
+                # 首先检测左侧是否有空位，如果有，停放在左侧
+                if np.argwhere(target_isl[ : ,left_row] == 0).size > 0:
+                    if i == 0:
+                        probn = 0
+                        empty_ind = np.argwhere(target_isl[ : ,left_row] == 0)[0][0]
+                    else:
+                        probn_ls = [1 - (1/2 * ((np.e)**(- (event - target_arrive[ : ,left_row][a][0]) / mu))) for a in np.argwhere(target_isl[ : ,left_row] == 0)]
+                        probn = min(probn_ls)
+                        ind_ls = [a[0] for a in np.argwhere(target_isl[ : ,left_row] == 0)]
+                        empty_ind = ind_ls[np.argmin(probn)]
+                    target_isl[empty_ind][left_row] = veh
+                    target_arrive[empty_ind][left_row] = event
+                    break
+                # 如果左侧没空，右侧有空，则停放在右侧
+                elif np.argwhere(target_isl[ : ,right_row] == 0).size > 0:
+                    if i == 0:
+                        probn = 0
+                        empty_ind = np.argwhere(target_isl[ : ,right_row] == 0)[0][0]
+                    else:
+                        probn_ls = [1 - (1/2 * (np.e**(- (event - target_arrive[ : ,right_row][a][0]) / mu))) for a in np.argwhere(target_isl[ : ,right_row] == 0)]
+                        probn = min(probn_ls)
+                        ind_ls = [a[0] for a in np.argwhere(target_isl[ : ,right_row] == 0)]
+                        empty_ind = ind_ls[np.argmin(probn)]
+                    target_isl[empty_ind][right_row] = veh
+                    target_arrive[empty_ind][right_row] = event
+                    break
+                else:
+                    # 如果当前列都没空，则看外侧一列是否有空
+                    continue
+            facility.isl_info[target_isl_ind] = target_isl
+            facility.arrive_info[target_isl_ind] = target_arrive
+            return "accept"
+        else:
+            return "reject"
+    if policy == "B2":
+        isl_capacity = []
+        backup_isl = []
+        for i in range(len(facility.isl_info)):
+            island = facility.isl_info[i]
+            if np.argwhere(island == 0).size > 0:
+                # 如果当前停车岛还有空车位，成为备选停车岛
+                backup_isl.append(i)
+                isl_capacity.append(island.shape[0] * island.shape[1])
+            else:
+                continue
+        if backup_isl:
+            # 如果还有备选停车岛，说明停车场没有停满
+            # 在备选停车岛中检测是否有空车位的中间排
+            # 从最小的停车岛开始检测，如果当前停车岛的第i排没有车位，则检测下一个停车岛，如果都没有，检测外侧排
+            # 一个数组储存各个停车岛的排数
+            isl_capacity_argsort = np.argsort(np.array(isl_capacity))
+            backup_isl = [backup_isl[i] for i in isl_capacity_argsort]
+            island_k = [facility.isl_info[i].shape[1] // 2 for i in backup_isl]
+            is_parked = 0
+            probn = 0
+            for k in range(max(island_k)):
+                if is_parked == 1:
+                    break
+                for i in range(len(backup_isl)):
+                    isl_ind = backup_isl[i]
+                    island = facility.isl_info[isl_ind]
+                    this_k = island_k[i]
+                    isl_arrive = facility.arrive_info[isl_ind]
+                    if this_k < k:
+                        # 如果当前停车岛的排数小于当前循环的排数，说明当前停车岛已经检测完，直接到下一个停车岛
+                        continue
+                    left_row = this_k - k - 1
+                    right_row = this_k + k
+                    # 首先检测左侧是否有空位，如果有，停放在左侧
+                    if np.argwhere(island[ : ,left_row] == 0).size > 0:
+                        if k == 0:
+                            probn = 0
+                            empty_ind = np.argwhere(island[ : ,left_row] == 0)[0][0]
+                        else:
+                            # 当不是中间排时，计算当前岛当前纵排的所有空泊位中，阻挡概率最小的
+                            probn_ls = [1 - (1/2 * (np.e**(- (event - isl_arrive[ : ,left_row][a][0]) / mu))) for a in np.argwhere(island[ : ,left_row] == 0)]
+                            probn = min(probn_ls)
+                            ind_ls = [a[0] for a in np.argwhere(island[ : ,left_row] == 0)]
+                            empty_ind = ind_ls[np.argmin(probn)]
+                        island[empty_ind][left_row] = veh
+                        isl_arrive[empty_ind][left_row] = event
+                        is_parked = 1
+                        break
+                    # 如果左侧没有空位，检测右侧是否有空位
+                    elif np.argwhere(island[ : ,right_row] == 0).size > 0:
+                        if k == 0:
+                            empty_ind = np.argwhere(island[ : ,right_row] == 0)[0][0]
+                        else:
+                            probn_ls = [1 - (1/2 * (np.e**(- (event - isl_arrive[ : ,right_row][a][0]) / mu))) for a in np.argwhere(island[ : ,right_row] == 0)]
+                            probn = min(probn_ls)
+                            ind_ls = [a[0] for a in np.argwhere(island[ : ,right_row] == 0)]
+                            empty_ind = ind_ls[np.argmin(probn)]
+                        island[empty_ind][right_row] = veh
+                        isl_arrive[empty_ind][right_row] = event
+                        is_parked = 1
+                        break
+                    # 如果都没有空位，则检测下一个停车岛的该排
+                    else:
+                        continue
+            return "accept"
+        else:
+            return "reject"
 
 def depart(veh, facility, show = False):
     # veh: the target vehilce which wanna go out
@@ -675,6 +803,7 @@ def depart(veh, facility, show = False):
                             return relocate_veh, relocate, block
                         # 如果没有足够的空闲位子，先移动可以移动的车辆，返回该部分移动过的车辆，并且没有移动过的车辆&需要离场的车辆
                         else:
+                            args = np.argwhere(back_copy != 0)
                             tpark_size = facility.tpark_info[i + 1].shape[0] * facility.tpark_info[i + 1].shape[1]
                             relocate_veh = back_copy[args][len(back_copy[args]) - 1 - tpark_size : ]
                             for r in relocate_veh:
@@ -732,6 +861,7 @@ def depart(veh, facility, show = False):
                             return relocate_veh, relocate, block
                         # 如果没有足够的空闲位子，先移动可以移动的车辆，返回该部分移动过的车辆，并且没有移动过的车辆&需要离场的车辆
                         else:
+                            args = np.argwhere(front_copy != 0)
                             tpark_size = facility.tpark_info[i + 1].shape[0] * facility.tpark_info[i + 1].shape[1]
                             relocate_veh = front_copy[args][len(front_copy[args]) - tpark_size : ]
                             for r in relocate_veh:
@@ -783,6 +913,7 @@ def depart(veh, facility, show = False):
                             return relocate_veh, relocate, block
                         # 如果没有足够的空闲位子，先移动可以移动的车辆，返回该部分移动过的车辆，并且没有移动过的车辆&需要离场的车辆
                         else:
+                            args = np.argwhere(back_copy != 0)
                             tpark_size = facility.tpark_info[i].shape[0] * facility.tpark_info[i].shape[1]
                             relocate_veh = back_copy[args][tpark_size : ]
                             for r in relocate_veh:
@@ -831,7 +962,7 @@ def depart(veh, facility, show = False):
 
 
 
-def simulation(facility, event, ind, dwell, demand, policy = "A1"):
+def simulation(facility, event, ind, dwell, demand, policy = "B2"):
     turn = 0
     relocate = 0
     reject = 0
@@ -840,6 +971,7 @@ def simulation(facility, event, ind, dwell, demand, policy = "A1"):
     end = 0
     history = []
     start_time = time.time()
+    initial_event = event.copy()
     while start == 0 or end == 0:
         # 第一步，判断该车辆是到达还是离去
         start = 1
@@ -855,7 +987,7 @@ def simulation(facility, event, ind, dwell, demand, policy = "A1"):
                 show = True
             else:
                 show = False
-            flag = arrive(v, turn, facility, d, policy, show)
+            flag = arrive(v, turn, facility, d, e, policy, show)
             if flag == "reject":
                 # 如果reject，则reject+1
                 # 并且，将其从离场中去除
@@ -876,7 +1008,8 @@ def simulation(facility, event, ind, dwell, demand, policy = "A1"):
                 # 先让重定位的车辆重定位
                 relocate_veh = relocate_veh.flatten()
                     # raise ValueError("None")
-                event = np.insert(event, turn + 1, [e for i in range(len(relocate_veh))])
+                relocate_event = [initial_event[int(v)] for v in relocate_veh]
+                event = np.insert(event, turn + 1, relocate_event)
                 ind = np.insert(ind, turn + 1, relocate_veh)
                 history.extend(relocate_veh)
                 # 然后判断是否存在block
@@ -889,16 +1022,18 @@ def simulation(facility, event, ind, dwell, demand, policy = "A1"):
         spare_spot = sum([len(np.argwhere(facility.isl_info[i] == 0)) for i in range(len(facility.isl_info))])
         end_time = time.time()
         last_time = end_time - start_time
-        if last_time >= 5:
+        # if last_time >= 5:
             # 超过5s还没有运行完毕，则说明遇到了不可行布局：
             # 在不可行布局下，临时停放车道容量太小，无法容纳车辆，造成阻断
             # 并且，在停车场满时，造成阻断的车辆分批重定位无法解决问题，其重定位只可以选择其出场的位置，造成永远的阻断。
-            return 0, 0, 0, 10**20
+            # return 0, 0, 0, 10**20
         if spare_spot == facility.get_capacity():
             end = 1
         turn += 1
     return relocate, reject, block, 0
 
-# num_stack = int(np.floor((120 - 3) / 2.5))
-# facility = Layout(1, [3], [1,1], 1, num_stack)
-# print(facility.get_size())
+# event, ind, demand, dwell_type = generate(1/120, 4, 400, 4)
+# num_stack = int(np.floor((20 - 3) / 2.5))
+# facility = Layout(16, [2,2,4,3,7,7,7,7,4,2,3,1,1,1,1,1], [1 for i in range(17)], 1, num_stack)
+# relocate, reject, block, feasible = simulation(facility, event, ind, dwell_type, demand, policy = "C1")
+# print(relocate, reject, block, feasible, facility.get_capacity(),facility.get_size())
