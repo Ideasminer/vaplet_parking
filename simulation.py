@@ -962,7 +962,7 @@ def depart(veh, facility, show = False):
 
 
 
-def simulation(facility, event, ind, dwell, demand, policy = "B2"):
+def simulation(facility, event, ind, dwell, demand, policy = "C2"):
     turn = 0
     relocate = 0
     reject = 0

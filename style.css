@@ -1,0 +1,487 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+body {
+    background-color: rgb(54, 54, 54);
+}
+.mask {
+    height: 100vh;
+    width: 100vw;
+    background-color: rgb(255, 255, 255, 0.7);
+    display:none;
+}
+.side {
+    position: absolute;
+    left: 0;
+    top: 1%;
+    background-color: rgb(85, 85, 85, 0.6);
+    width: 8vw;
+    height: 98vh;
+    border-radius: 1vw;
+    z-index: 1;
+}
+.side .brand {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    left: 50%;
+    top: 7%;
+    width: 80%;
+    height: 9%;
+    border-radius: 1vw;
+    background: linear-gradient(135deg, rgba(0,0,0,0.22), rgba(255,255,255,0.22));
+    box-shadow: 0px 0px 20px rgb(255,255, 255, 0.6)
+
+}
+.side #vapsim {
+    width: 90%;
+    height: 90%;
+}
+
+.side #vapsim:hover {
+    cursor: default;
+}
+.side .description {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: 12%;
+    left: 50%;
+    top: 88%;
+    font-weight: 500;
+    color: azure;
+    text-align: center;
+}
+.side .description .icon {
+    margin-top: 3vh;
+    width: 30px;
+    top: 95%;
+    left: 50%;
+}
+.func {
+    position: absolute;
+    margin-left: 1vw;
+    margin-right: 1vw;
+    left: 8vw;
+    bottom: 1%;
+    background: azure;
+    height: 38%;
+    width: 90vw;
+    z-index: 10;
+    border-radius: 1vw;
+    justify-content: center;
+}
+.func::before {
+    content: "";
+    position: absolute;
+    left: 0%;
+    bottom: 0%;
+    background: rgb(40, 40, 40,0.6);
+    border-radius: 1vw;
+    height: 100%;
+    width: 100%;
+    z-index: -1;
+}
+.show {
+    position: absolute;
+    margin-left: 1vw;
+    margin-right: 1vw;
+    left: 8vw;
+    top: 1%;
+    background-color: rgb(189, 185, 185, 0.5);
+    width: 90vw;
+    border-radius: 1vw;
+    height: 58%;
+}
+.func .funcBox {
+    position: absolute;
+    width: 14vw;
+    height: 14vw;
+    background: linear-gradient(-45deg, rgba(0,0,0,0.22), rgba(255,255,255,0.22));
+    transform: translate(-50%, -50%);
+    top: 50%;
+    display: inline-block;
+    border-radius: 3vw;
+    box-shadow: 10px 10px 40px rgb(0, 0, 0, 0.6),
+                -10px -10px 40px rgb(255,255, 255, 0.6);
+}
+.func .icon:hover{
+    cursor: default;
+}
+#widthBox {
+    left: 12.5%;
+}
+
+#heightBox {
+    left: 37.5%;
+}
+
+#policy {
+    left: 62.5%;
+}
+
+#io {
+    left: 87.5%;
+}
+.icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    height: 35px;
+    width: 35px;
+    transform: translate(-50%, -50%);
+    display: inline;
+    fill: rgb(221, 221, 221);
+}
+.icon:hover{
+    cursor: pointer;
+}
+#goback {
+    position: absolute;
+    top: 1.5em;
+    left: 1.5em;
+    fill: black;
+    background-color: transparent;
+}
+#gopre {
+    position: absolute;
+    top: 1.5em;
+    left: 2vw;
+    fill: black;
+    background-color: transparent;
+    display: none;
+}
+.icon-des{
+    display: inline;
+}
+.settingbox {
+    margin-top: 5%;
+    position: absolute;
+    text-align: center;
+    justify-content: center;
+    transform: translate(-50%, -50%);
+    left: 50%;
+    box-shadow: -5px -5px 5px rgb(0, 0, 0, 0.6);
+    background: linear-gradient(135deg, rgba(0,0,0,0.22), rgba(255,255,255,0.22));
+    border-radius: 2vw;
+    height: 7%;
+    width: 90%;
+    z-index: 10;
+}
+.settingbox:hover {
+    cursor: pointer;
+    box-shadow: -5px -5px 5px rgb(255, 255, 255, 0.4);
+}
+.settingbox .icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+}
+.infoBox {
+    position: absolute;
+    color:white;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    top: 20vh;
+    left: 50%;
+}
+#avatorbox {
+    top: 21%;
+}
+#loginbox {
+    top: 34%;
+}
+#historybox {
+    top: 47%;
+}
+.historyInfo {
+    position: absolute;
+    top: 40%;
+    left: 20%;
+    color: white;
+    font-size: 18px;
+}
+#configbox {
+    top:60%;
+}
+#refreshbox {
+    top: 73%;
+}
+.show .renderbox {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    left: 50%;
+    font-size: 2em;
+    font-weight: 600;
+    border-radius: 3vw;
+    width: 18vw;
+    height: 8vh;
+    text-align: center;
+    line-height: 8vh;
+    box-shadow: 10px 10px 40px rgb(0, 0, 0, 0.6),
+    -10px -10px 40px rgb(255,255, 255, 0.6);
+    background: linear-gradient(-45deg, rgba(0,0,0,0.22), rgba(255,255,255,0.22));
+}
+.show .renderbox:hover {
+    cursor: pointer;
+    box-shadow: 10px 10px 40px rgb(255, 255, 255, 0.4),
+    -10px -10px 40px rgb(0,0, 0, 0.4);
+}
+#layout {
+    position:absolute;
+    transform: translate(-50%, -50%) scale(0.8);
+    top: 50%;
+    left: 50%;
+    display: none;
+}
+.show .download {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 90%;
+    left: 90%;
+    font-size: 1em;
+    font-weight: 600;
+    border-radius: 3vw;
+    width: 12vw;
+    height: 4vh;
+    text-align: center;
+    display: none;
+    line-height: 4vh;
+    box-shadow: 10px 10px 40px rgb(0, 0, 0, 0.6),
+    -10px -10px 40px rgb(255,255, 255, 0.6);
+    background: linear-gradient(-45deg, rgba(0,0,0,0.22), rgba(255,255,255,0.22));
+}
+.show .download a {
+    text-decoration: none;
+}
+.show .getjson:hover {
+    cursor: pointer;
+    box-shadow: 10px 10px 40px rgb(255, 255, 255, 0.4),
+    -10px -10px 40px rgb(0,0, 0, 0.4);
+}
+
+.func input[type="range"] {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 70%;
+    left: 50%;
+    -webkit-box-shadow: 0 1px 0 0px #424242, 0 1px 0 #060607 inset, 0px 2px 10px 0px black inset, 1px 0px 2px rgba(0, 0, 0, 0.4) inset, 0 0px 1px rgba(0, 0, 0, 0.6) inset;
+    margin-top: 2px;
+    background-color: rgba(112, 112, 112, 0.4);
+    border-radius: 15px;
+    width: 90%;
+    -webkit-appearance: none;
+    height:30px;
+}
+.func input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    cursor: default;
+    top: -5px;
+    height: 35px;
+    width: 20px;
+    transform: translateY(-4px);
+    background: none repeat scroll 0 0 #777;
+    border-radius: 15px;
+    -webkit-box-shadow: 0 -1px 1px black inset;
+}
+.func select {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 70%;
+    left: 50%;
+    width: 90%;
+    height: 30px;
+    border-radius: 1vw;
+    background-color: rgba(112, 112, 112, 0.4);
+    -webkit-box-shadow: 0 1px 0 0px #424242, 0 1px 0 #060607 inset, 0px 2px 10px 0px black inset, 1px 0px 2px rgba(0, 0, 0, 0.4) inset, 0 0px 1px rgba(0, 0, 0, 0.6) inset;
+    font-size: 1.2em;
+    font-weight: 600;
+    color: rgb(221, 221, 221);
+}
+.func select option{
+    color: rgb(54, 54, 54);
+    -webkit-appearance: none;
+    background-color: rgba(122, 120, 120, 0.8);
+}
+#io input[type="submit"] {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 70%;
+    left: 50%;
+    width: 90%;
+    height: 30px;
+    border-radius: 1vw;
+    background-color: rgba(112, 112, 112, 0.4);
+    -webkit-box-shadow: 0 1px 0 0px #424242, 0 1px 0 #060607 inset, 0px 2px 10px 0px black inset, 1px 0px 2px rgba(0, 0, 0, 0.4) inset, 0 0px 1px rgba(0, 0, 0, 0.6) inset;
+    text-decoration: none;
+    color: rgb(221, 221, 221);
+    font-size: 1.2em;
+    font-weight: 600;
+    text-align: center;
+    line-height: 30px;
+}
+.func .icon {
+    position: absolute;
+    fill:azure;
+    left: 50%;
+    top:40%;
+    height: 45px;
+    width: 45px;
+}
+.modal {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    left: 54%;
+    border-radius: 1vw;
+    width: 60vw;
+    height: 70vh;
+    background-color: rgb(19, 28, 41, 0.9);
+    z-index: 15;
+    display: none;
+}
+.modal #close {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 5%;
+    left: 95%;
+    opacity: 0.9;
+}
+.modal .title {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 20%;
+    left: 50%;
+    font-size: 70px;
+    color: azure;
+    font-weight: 600;
+    font-style: italic;
+}
+.modal input {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 40%;
+    left: 55%;
+    display: inline-block;
+    border-radius: 2vw;
+    width: 30%;
+    height: 6%;
+    border: none;
+}
+.modal #password{
+    top: 55%;
+}
+.modal #login_password{
+    top: 55%;
+}
+.modal #username_icon{
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 40%;
+    left: 35%;
+}
+.modal #password_icon{
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 55%;
+    left: 35%;
+}
+
+.modal #login #password_icon{
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 55%;
+    left: 35%;
+}
+#login .sendlogin {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 75%;
+    left: 50%;
+    width: 10%;
+    height: 6vh;
+    background: linear-gradient(90deg, #b92b27, #1565C0);
+    border-radius: 3vw;
+    text-align: center;
+    line-height: 8%;
+    z-index: 10;
+}
+
+#login .sendlogin:hover {
+    cursor: pointer;
+}
+#login .inform {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 90%;
+    left: 50%;
+    text-decoration: none;
+    color: azure;
+    font-style: italic;
+    font-weight: 500;
+}
+#login .inform u:hover {
+    cursor: pointer;
+}
+#register .title {
+    font-size: 2em;
+}
+#register #email_icon {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 70%;
+    left: 35%;
+}
+#register #email {
+    top: 70%;
+}
+#register input[type="submit"] {
+    left:50%;
+    top:85%;
+    width: 15%;
+    background: linear-gradient(90deg, #009FFF, #ec2F4B);
+    color: azure;
+    font-size: 1.2em;
+    font-weight: 500;
+}
+#gamma {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top:40%;
+    left:50%;
+}
+#beta1 {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top:50%;
+    left:50%;
+}
+#beta2 {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top:60%;
+    left:50%;
+}
+#beta3 {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top:70%;
+    left:50%;
+}
+.math {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    left: 25%;
+    color: white;
+    font-size: 20px;
+}
+#setting input[type="submit"] {
+    left:50%;
+    top:85%;
+    width: 15%;
+    background: linear-gradient(90deg, #009FFF, #ec2F4B);
+    color: azure;
+    font-size: 1.2em;
+    font-weight: 500;
+}

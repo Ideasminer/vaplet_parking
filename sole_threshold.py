@@ -3,8 +3,10 @@
 from simulation import Layout, simulation, generate
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.linear_model import LinearRegression
-
+import seaborn as sns
+from  sklearn.linear_model import LinearRegression
+plt.rcParams['font.sans-serif'] = ['FangSong']
+plt.rcParams['axes.unicode_minus'] = False
 max_k = 20
 num_stack = 10
 lam = 1 / 120
@@ -60,19 +62,33 @@ def get_res(max_k, num_stack, lam, mu, threshold):
             occupy.append(in_veh - out_veh)
         peak_occupy = max(occupy)
         # print(peak_occupy / demand)
-        relocate, reject, block = simulation(facility, event, ind, dwell_type, demand, policy = "C1")
+        relocate, reject, block, feasible = simulation(facility, event, ind, dwell_type, demand, policy = "C4")
         time_range = event[-1] - event[0]
         relocate_rate.append(relocate / demand)
         reject_rate.append(reject / demand)
         block_rate.append(block / demand)
     return relocate_rate, reject_rate, block_rate
 
-def res_plot(max_k, res):
-    plt.scatter(x=[i for i in range(1, 1 + max_k)], y=res)
-    plt.show()
+def res_plot(max_k, res, name, folder = '.'):
+    x=[i for i in range(1, 1 + max_k)]
+    y=res
+    plt.scatter(x, y, c='blue', marker = 'x')
+    plt.title('C2策略下重定位率随停车岛规模的变化趋势')
+    plt.xlabel('仿真次数')
+    plt.ylabel('重定位率')
 
 relocate_rate, reject_rate, block_rate = get_res(max_k, num_stack, lam, mu, threshold)
-res_plot(max_k, relocate_rate)
-# LR = LinearRegression()
-# LR.fit(np.array([i for i in range(1, 1 + max_k)]).reshape(-1, 1), np.array(relocate_rate).reshape(-1, 1))
-# print(LR.intercept_, LR.coef_)
+res_plot(max_k, relocate_rate, 'relocate_rate')
+# for i, j in zip([relocate_rate, reject_rate, block_rate],['relocate_rate', 'reject_rate', 'block_rate']):
+#     res_plot(max_k, i, j)
+
+model = LinearRegression()
+model.fit(np.array([i for i in range(max_k)]).reshape(-1, 1), np.array(relocate_rate).reshape(-1, 1))
+x = [i for i in np.arange(1, 20.1, 0.01)]
+y = model.predict(np.array(x).reshape(-1,1)).tolist()
+plt.plot(x, y, c='red')
+plt.legend(['趋势线'],loc='best')
+
+plt.savefig('.' + '/' + 'single_{}.png'.format('relocate_rate'), dpi = 1000)
+plt.close()
+print(model.intercept_, model.coef_)
